@@ -340,7 +340,7 @@ def set_config_setting_route():
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/get-config-setting')
 def get_config_setting_route():

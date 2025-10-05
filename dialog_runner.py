@@ -34,7 +34,8 @@ def run_dialog(mode):
             return jsonify({"error": "No selection made"}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.error("Exception in run_dialog: %s", e, exc_info=True)
+        return jsonify({"error": "An internal error has occurred."}), 500
 
 
 """
