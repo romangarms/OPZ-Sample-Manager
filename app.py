@@ -53,6 +53,62 @@ os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 os.makedirs(SYN_CONVERTED_FOLDER, exist_ok=True)
 os.makedirs(DRUM_CONVERTED_FOLDER, exist_ok=True)
 
+# Helper function to convert audio files to OP-Z compatible format
+def convert_audio_file(input_path, output_path, sample_type):
+    """
+    Convert an audio file to OP-Z compatible AIFF format.
+
+    Args:
+        input_path: Path to the input audio file
+        output_path: Path where the converted file should be saved
+        sample_type: Either "drum" (12s max) or "synth" (6s max)
+
+    Returns:
+        True if conversion succeeds
+
+    Raises:
+        Exception if conversion fails
+    """
+    max_duration = 12 if sample_type == "drum" else 6
+    ffmpeg_path = get_config_setting("FFMPEG_PATH", "ffmpeg")
+
+    ffmpeg_cmd = [
+        ffmpeg_path,
+        "-i",
+        input_path,
+        "-af",
+        "loudnorm",  # normalize audio
+        "-t",
+        str(max_duration),  # trim to correct duration
+        "-ac",
+        "1",  # force mono
+        "-ar",
+        "44100",  # sample rate 44.1k
+        "-sample_fmt",
+        "s16",  # 16-bit samples
+        output_path,
+    ]
+
+    subprocess.run(ffmpeg_cmd, check=True)
+    return True
+
+# Helper function to determine sample type from category
+def get_sample_type_from_category(category):
+    """
+    Determine if a category is a drum or synth sample.
+
+    Categories 1-4 (kick, snare, perc, fx) are drum samples (12s max).
+    Categories 5-8 (bass, lead, arpeggio, chord) are synth samples (6s max).
+
+    Args:
+        category: Category string like "1-kick" or "8-chord"
+
+    Returns:
+        "drum" or "synth"
+    """
+    drum_categories = ["1-kick", "2-snare", "3-perc", "4-fx"]
+    return "drum" if category in drum_categories else "synth"
+
 # run before server startup at the end of this file
 def app_startup_tasks():
     # config
@@ -134,9 +190,17 @@ def upload_sample():
     target_dir = os.path.join(OPZ_MOUNT_PATH, "samplepacks", category, f"{int(slot)+1:02d}")
     os.makedirs(target_dir, exist_ok=True)
 
-    # Clean the filename and write it to disk
-    filename = werkzeug.utils.secure_filename(file.filename)
-    save_path = os.path.join(target_dir, filename)
+    # Clean the filename and determine if conversion is needed
+    original_filename = werkzeug.utils.secure_filename(file.filename)
+    file_ext = os.path.splitext(original_filename)[1].lower()
+    needs_conversion = file_ext != ".aiff"
+
+    # Final filename will always be .aiff
+    base_name = os.path.splitext(original_filename)[0]
+    final_filename = base_name + ".aiff"
+    final_path = os.path.join(target_dir, final_filename)
+
+    temp_path = None
 
     try:
         # Delete any existing sample(s) in this slot
@@ -145,17 +209,37 @@ def upload_sample():
             if os.path.isfile(existing_path):
                 os.remove(existing_path)
 
-        file.save(save_path)
+        if needs_conversion:
+            # Save to temp location, convert, then delete temp
+            temp_path = os.path.join(UPLOAD_FOLDER, str(uuid.uuid4()) + "_" + original_filename)
+            file.save(temp_path)
+
+            # Determine sample type from category
+            sample_type = get_sample_type_from_category(category)
+
+            # Convert to final location
+            convert_audio_file(temp_path, final_path, sample_type)
+        else:
+            # Already .aiff, save directly
+            file.save(final_path)
+
         return {
             "status": "uploaded",
-            "path": html.escape(save_path),
-            "filename": html.escape(filename),
-            "filesize": os.path.getsize(save_path),
+            "path": html.escape(final_path),
+            "filename": html.escape(final_filename),
+            "filesize": os.path.getsize(final_path),
         }, 200
 
+    except subprocess.CalledProcessError as e:
+        app.logger.error(f"Conversion error: {e}")
+        return {"error": "Audio conversion failed"}, 500
     except Exception as e:
         app.logger.error(f"Upload error: {e}")
         return {"error": "File save failed"}, 500
+    finally:
+        # Clean up temp file if it exists
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
 
 @app.route("/delete-sample", methods=["DELETE"])
 def delete_sample():
@@ -232,34 +316,14 @@ def convert_sample():
     input_path = os.path.join(UPLOAD_FOLDER, str(uuid.uuid4()) + "_" + file.filename)
     file.save(input_path)
 
-    # Set output filename
+    # Set output filename (for sample converter page, saves to converted/ folder)
     output_filename = os.path.splitext(os.path.basename(file.filename))[0] + ".aiff"
     output_path = os.path.join(CONVERTED_FOLDER, sample_type, output_filename)
 
-    # Determine max length
-    max_duration = 12 if sample_type == "drum" else 6
-    ffmpeg_path = get_config_setting("FFMPEG_PATH", "ffmpeg")
-
-    # ffmpeg command
-    ffmpeg_cmd = [
-        ffmpeg_path,
-        "-i",
-        input_path,
-        "-af",
-        "loudnorm",  # normalize audio
-        "-t",
-        str(max_duration),  # trim to correct duration
-        "-ac",
-        "1",  # force mono
-        "-ar",
-        "44100",  # sample rate 44.1k
-        "-sample_fmt",
-        "s16",  # 16-bit samples
-        output_path,
-    ]
-
     try:
-        subprocess.run(ffmpeg_cmd, check=True)
+        # Use shared conversion function
+        convert_audio_file(input_path, output_path, sample_type)
+        return jsonify({"message": f"Converted to {output_filename} successfully."})
     except subprocess.CalledProcessError as e:
         app.logger.error(f"Subprocess Error: {e}")
         return jsonify({"error": "Conversion failed"}), 500
@@ -276,8 +340,6 @@ def convert_sample():
             app.logger.info("Removed unconverted uploaded file")
         else:
             app.logger.warning("Did not find uploaded file and it was not removed")
-
-    return jsonify({"message": f"Converted to {output_filename} successfully."})
 
 # open the sample converter's converted folder in the file explorer
 @app.route("/open-explorer", methods=["POST"])
