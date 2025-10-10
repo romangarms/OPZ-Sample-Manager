@@ -179,3 +179,23 @@ def save_midi_config():
     data = request.get_json()
     write_json_to_path(midi_json_path, data)
     return '', 204
+
+@config_bp.route('/get-config/dmx')
+def get_dmx_config():
+    OPZ_MOUNT_PATH = get_config_setting("OPZ_MOUNT_PATH")
+    dmx_json_path = os.path.join(OPZ_MOUNT_PATH, 'config', 'dmx.json')
+    if not os.path.exists(dmx_json_path):
+        return jsonify({"error": "dmx.json not found"}), 404
+    with open(dmx_json_path, 'r') as f:
+        content = f.read()
+    return jsonify({"content": content})
+
+@config_bp.route('/save-config/dmx', methods=['POST'])
+def save_dmx_config():
+    OPZ_MOUNT_PATH = get_config_setting("OPZ_MOUNT_PATH")
+    dmx_json_path = os.path.join(OPZ_MOUNT_PATH, 'config', 'dmx.json')
+    data = request.get_json()
+    content = data.get('content', '')
+    with open(dmx_json_path, 'w') as f:
+        f.write(content)
+    return '', 204

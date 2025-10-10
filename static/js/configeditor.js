@@ -19,11 +19,8 @@ function createCheckboxInput(name, checked, idx = null) {
   return input;
 }
 
-async function loadConfig(configName) {
-  const res = await fetch(`/get-config/${configName}`);
-  const config = await res.json();
-  const form = document.getElementById('config-form');
-  form.innerHTML = '';
+function buildConfigForm(config, formElement) {
+  formElement.innerHTML = '';
 
   for (const [key, value] of Object.entries(config)) {
     const wrapper = document.createElement('div');
@@ -31,33 +28,26 @@ async function loadConfig(configName) {
 
     const label = document.createElement('label');
     label.textContent = key;
-    label.className = "block font-medium mb-1 text-gray-800";
+    label.className = "config-label";
 
     wrapper.appendChild(label);
 
     if (typeof value === 'boolean') {
-      // Single boolean
       wrapper.appendChild(createCheckboxInput(key, value));
-
     } else if (typeof value === 'number') {
-      // Single number
       wrapper.appendChild(createNumberInput(key, value));
-
     } else if (Array.isArray(value)) {
       value.forEach((item, idx) => {
         const row = document.createElement('div');
         row.className = "config-array";
 
         if (Array.isArray(item)) {
-          // Nested array (e.g. parameter_cc_out)
           item.forEach((val, subIdx) => {
             row.appendChild(createNumberInput(key, val, idx, subIdx));
           });
         } else if (typeof item === 'boolean') {
-          // Flat array of booleans (e.g. track_enable)
           row.appendChild(createCheckboxInput(key, item, idx));
         } else {
-          // Flat array of numbers (e.g. track_channels)
           row.appendChild(createNumberInput(key, item, idx));
         }
 
@@ -65,13 +55,48 @@ async function loadConfig(configName) {
       });
     }
 
-    form.appendChild(wrapper);
+    formElement.appendChild(wrapper);
   }
 }
 
-document.getElementById('save-button').addEventListener('click', async () => {
-  const inputs = document.querySelectorAll('#config-form input');
-  const updatedConfig = {};
+async function loadGeneralConfig() {
+  const res = await fetch('/get-config/general');
+  const config = await res.json();
+  const form = document.getElementById('general-form');
+  buildConfigForm(config, form);
+}
+
+async function loadMidiConfig() {
+  const res = await fetch('/get-config/midi');
+  const config = await res.json();
+  const form = document.getElementById('midi-form');
+  buildConfigForm(config, form);
+}
+
+async function loadDmxConfig() {
+  try {
+    const res = await fetch('/get-config/dmx');
+    const data = await res.json();
+    const textarea = document.getElementById('dmx-textarea');
+    textarea.value = data.content || '';
+  } catch (err) {
+    console.error('Error loading DMX config:', err);
+    const textarea = document.getElementById('dmx-textarea');
+    textarea.value = '// Error loading DMX config';
+  }
+}
+
+async function loadAllConfigs() {
+  await Promise.all([
+    loadGeneralConfig(),
+    loadMidiConfig(),
+    loadDmxConfig()
+  ]);
+}
+
+function parseFormConfig(formElement) {
+  const inputs = formElement.querySelectorAll('input');
+  const config = {};
 
   inputs.forEach(input => {
     const key = input.name;
@@ -80,62 +105,82 @@ document.getElementById('save-button').addEventListener('click', async () => {
 
     if (input.type === 'checkbox') {
       if (idx !== undefined && idx !== null) {
-        if (!Array.isArray(updatedConfig[key])) updatedConfig[key] = [];
-        updatedConfig[key][idx] = input.checked;
+        if (!Array.isArray(config[key])) config[key] = [];
+        config[key][idx] = input.checked;
       } else {
-        updatedConfig[key] = input.checked;
+        config[key] = input.checked;
       }
-
     } else if (input.type === 'number') {
       const num = parseInt(input.value);
       if (idx !== undefined && idx !== null) {
-        if (!Array.isArray(updatedConfig[key])) updatedConfig[key] = [];
+        if (!Array.isArray(config[key])) config[key] = [];
         if (subIdx !== undefined && subIdx !== null) {
-          updatedConfig[key][idx] = updatedConfig[key][idx] ?? [];
-          updatedConfig[key][idx][subIdx] = num;
+          config[key][idx] = config[key][idx] ?? [];
+          config[key][idx][subIdx] = num;
         } else {
-          updatedConfig[key][idx] = num;
+          config[key][idx] = num;
         }
       } else {
-        updatedConfig[key] = num;
+        config[key] = num;
       }
     }
   });
 
-  await fetch(`/save-config/${currentConfigName}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updatedConfig)
-  });
+  return config;
+}
+
+document.getElementById('save-button').addEventListener('click', async () => {
+  try {
+    // Parse and save general config
+    const generalConfig = parseFormConfig(document.getElementById('general-form'));
+    await fetch('/save-config/general', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(generalConfig)
+    });
+
+    // Parse and save midi config
+    const midiConfig = parseFormConfig(document.getElementById('midi-form'));
+    await fetch('/save-config/midi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(midiConfig)
+    });
+
+    // Save dmx config (raw text)
+    const dmxContent = document.getElementById('dmx-textarea').value;
+    await fetch('/save-config/dmx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: dmxContent })
+    });
+
+    alert('All configurations saved successfully!');
+  } catch (err) {
+    console.error('Error saving configs:', err);
+    alert('Error saving configurations. Check console for details.');
+  }
 });
 
-// Set up config file selector and initial load
-let currentConfigName = 'general';
-
-document.getElementById('config-select').addEventListener('change', (e) => {
-  currentConfigName = e.target.value;
-  loadConfig(currentConfigName);
-});
-
-loadConfig(currentConfigName);
-
+// Initial load
+loadAllConfigs();
 
 async function pollForMount(retries = 60, delay = 2000) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const res = await fetch(`/get-config-setting?config_option="OPZ_MOUNT_PATH"`);
-            const data = await res.json();
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(`/get-config-setting?config_option=OPZ_MOUNT_PATH`);
+      const data = await res.json();
 
-            if (data["OPZ_MOUNT_PATH"]) {
-                await loadConfig(currentConfigName);
-                return;
-            }
-        } catch (err) {
-            console.error("Failed to check mount path:", err);
-        }
-        await new Promise(r => setTimeout(r, delay));
+      if (data["config_value"]) {
+        await loadAllConfigs();
+        return;
+      }
+    } catch (err) {
+      console.error("Failed to check mount path:", err);
     }
+    await new Promise(r => setTimeout(r, delay));
+  }
 
-    console.warn("Mount path not found after polling.");
+  console.warn("Mount path not found after polling.");
 }
 pollForMount();

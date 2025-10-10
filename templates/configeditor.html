@@ -12,23 +12,37 @@
 <h1>OP-Z Config Editor</h1>
 
 <button onclick="window.location.href='/'" class="btn btn-primary">Home Page</button>
+<button id="save-button" class="btn btn-secondary">Save Changes</button>
 
-<div class="p-6 max-w-3xl mx-auto">
+<div id="config-container">
+  <!-- First Row: General and MIDI side by side -->
+  <div class="config-row">
+    <!-- General Config Section -->
+    <div class="config-section-wrapper">
+      <div class="config-section">
+        <h3>General Config</h3>
+        <form id="general-form" class="config-form-inner"></form>
+      </div>
+    </div>
 
-  <!-- Config Selector -->
-  <div class="mb-6">
-    <label for="config-select" class="block mb-2 font-medium text-gray-800">Select Config File</label>
-    <select id="config-select" class="form-select">
-      <option value="general">general.json</option>
-      <option value="midi">midi.json</option>
-    </select>
+    <!-- MIDI Config Section -->
+    <div class="config-section-wrapper">
+      <div class="config-section">
+        <h3>MIDI Config</h3>
+        <form id="midi-form" class="config-form-inner"></form>
+      </div>
+    </div>
   </div>
 
-  <!-- Config Form -->
-  <form id="config-form"></form>
-
-  <!-- Save Button -->
-  <button id="save-button" class="btn btn-primary">Save Changes</button>
+  <!-- Second Row: DMX full width -->
+  <div class="config-section-wrapper full-width">
+    <div class="config-section">
+      <h3>DMX Config</h3>
+      <div class="config-form-inner">
+        <textarea id="dmx-textarea" placeholder="DMX configuration will load here..."></textarea>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="/static/js/configeditor.js"></script>

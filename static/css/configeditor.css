@@ -1,27 +1,111 @@
-#config-form {
+h1 {
+    text-align: center;
+}
+
+#config-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 30px auto;
+    max-width: 1400px;
+}
+
+.config-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.config-section-wrapper {
+    flex: 1;
+    min-width: 300px;
+    margin: 0 10px;
+}
+
+.config-section-wrapper.full-width {
+    flex: none;
+    width: calc(100% - 20px);
+}
+
+.config-section {
     background-color: var(--background-color);
-    padding: 1px;
-    margin: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.config-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--text-color);
+    font-weight: bold;
+    padding-bottom: 8px;
+}
+
+.config-form-inner {
+    background-color: var(--offwhite);
+    border-radius: 5px;
+    padding: 20px;
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 .config-item {
-    background-color: var(--offwhite);
-    margin: 1%;
-    padding: 1%;
-    border-radius: 10px;
+    background-color: white;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.config-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-color);
 }
 
 .config-number-input {
     width: 70px;
-    padding: 5px;
+    padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    margin: 2px;
+    font-family: monospace;
 }
 
-.config-array{
-    margin: 20px
+.config-array {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
-.toggle-checkbox{
-    margin-left: 10px;
+.toggle-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+#dmx-textarea {
+    width: 100%;
+    min-height: 350px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    #config-container {
+        flex-direction: column;
+    }
+
+    .config-section-wrapper {
+        margin: 0;
+    }
 }
