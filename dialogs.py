@@ -4,14 +4,15 @@ import sys
 import argparse
 import subprocess
 import os
-from flask import jsonify
+from flask import Blueprint, jsonify, current_app
 
+# Create Blueprint for dialog routes
+dialog_bp = Blueprint('dialog', __name__)
 
 def run_dialog(mode):
-    from app import app
     try:
         result = subprocess.run(
-            [sys.executable, "dialog_runner.py", mode],
+            [sys.executable, "dialogs.py", mode],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             timeout=30
@@ -20,7 +21,7 @@ def run_dialog(mode):
 
         if mode == "multi":
             paths = [line for line in output.splitlines() if line]
-            app.logger.debug("Got multiple paths: %s", paths)
+            current_app.logger.debug("Got multiple paths: %s", paths)
             if paths:
                 return jsonify({"paths": paths})
             else:
@@ -28,18 +29,17 @@ def run_dialog(mode):
 
         # Single path case (file, folder, save)
         if output and (os.path.exists(output) or mode == "save"):
-            app.logger.debug("Got path of: %s from user.", output)
+            current_app.logger.debug("Got path of: %s from user.", output)
             return jsonify({"path": output})
         else:
             return jsonify({"error": "No selection made"}), 400
 
     except Exception as e:
-        app.logger.error("Exception in run_dialog: %s", e, exc_info=True)
+        current_app.logger.error("Exception in run_dialog: %s", e, exc_info=True)
         return jsonify({"error": "An internal error has occurred."}), 500
 
 
 """
-
 
     DO NOT CHANGE THE PRINT STATMENTS IN THIS TO THE LOGGER, IT WILL BREAK IT
 
@@ -71,6 +71,28 @@ def show_dialog(mode):
 
     if path:
         print(path)
+
+# Flask routes to run dialogs for file/folder selection
+
+@dialog_bp.route("/get-user-file-path")
+def get_user_file():
+    current_app.logger.info("Getting file path from user")
+    return run_dialog("file")
+
+@dialog_bp.route("/get-user-folder-path")
+def get_user_folder():
+    current_app.logger.info("Getting Folder Path from user")
+    return run_dialog("folder")
+
+@dialog_bp.route("/get-save-location-path")
+def get_save_location():
+    current_app.logger.info("Get save location path - redundant?")
+    return run_dialog("save")
+
+@dialog_bp.route("/get-user-multiple-file-paths")
+def get_user_multiple_files():
+    current_app.logger.info("Getting multiple file paths from user")
+    return run_dialog("multi")
 
 def main():
     parser = argparse.ArgumentParser(description="Launch a native file dialog")
