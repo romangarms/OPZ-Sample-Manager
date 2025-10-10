@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{%block stylesheets %}
+<link rel="stylesheet" href="/static/css/index.css">
+{%endblock%}
+
 {%block title %}
 <title>OP-Z Sample Manager and Converter</title>
 {%endblock%}
@@ -30,19 +34,49 @@
 
     // Run when window regains focus
     window.addEventListener('focus', checkMountPath);
+
+    // Initialize Lucide icons
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+    });
 </script>
 
 <div id="mount-path-container" class="container">
     <p id="mount-path">Checking OP-Z mount path...</p>
 </div>
 
-<button onclick="window.location.href='/sampleconverter'" class="btn btn-primary">Sample Converter</button>
+<div class="tile-grid">
+    <a href="/sampleconverter" class="nav-tile tile-primary">
+        <i data-lucide="audio-waveform"></i>
+        <h3>Sample Converter</h3>
+        <p>Convert audio files to OP-Z format</p>
+    </a>
 
-<button onclick="window.location.href='/samplemanager'" class="btn btn-secondary">Sample Manager</button>
+    <a href="/samplemanager" class="nav-tile tile-secondary">
+        <i data-lucide="folder-open"></i>
+        <h3>Sample Manager</h3>
+        <p>Manage samples on your OP-Z</p>
+    </a>
 
-<button onclick="window.location.href='/configeditor'" class="btn btn-warning">Config Editor</button>
+    <a href="/configeditor" class="nav-tile tile-warning">
+        <i data-lucide="file-edit"></i>
+        <h3>Config Editor</h3>
+        <p>Edit OP-Z configuration files</p>
+    </a>
 
-<button onclick="window.location.href='/utilitysettings'" class="btn btn-danger">Utility Settings</button>
+    <a href="/utilitysettings" class="nav-tile tile-danger">
+        <i data-lucide="settings"></i>
+        <h3>Utility Settings</h3>
+        <p>Configure application settings</p>
+    </a>
+</div>
+
+<div style="text-align: center;">
+    <a href="https://github.com/romangarms/opz-sample-manager" target="_blank" class="github-link">
+        <i data-lucide="github"></i>
+        View on GitHub
+    </a>
+</div>
 
 {% endblock %}
 

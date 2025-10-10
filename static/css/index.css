@@ -1,0 +1,101 @@
+h1 {
+    text-align: center;
+}
+
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 30px auto;
+    max-width: 800px;
+}
+
+.nav-tile {
+    background-color: var(--background-color);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-tile:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    color: white;
+}
+
+.nav-tile i {
+    width: 48px;
+    height: 48px;
+    stroke-width: 2;
+}
+
+.nav-tile h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-tile p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.95;
+}
+
+.tile-primary {
+    background-color: var(--first-color);
+}
+
+.tile-secondary {
+    background-color: var(--second-color);
+}
+
+.tile-warning {
+    background-color: var(--third-color);
+}
+
+.tile-danger {
+    background-color: var(--fourth-color);
+}
+
+.github-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background-color: #24292e;
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 500;
+    margin-top: 20px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.github-link:hover {
+    background-color: #2f363d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.github-link i {
+    width: 24px;
+    height: 24px;
+}
+
+@media (max-width: 768px) {
+    .tile-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
