@@ -18,32 +18,93 @@
 <div id="sample-output"></div>
 
 <div id="storage-info">
-    <p>Total Storage Used: <span id="storage-percent">0%</span></p>
-    <p>Storage Used: <span id="storage-used">0 KB</span></p>
-    <p>Storage Free: <span id="storage-free">0 KB</span></p>
-    <br>
-    <p>Total Samples Used: <span id="samples-percent">0%</span></p>
-    <p>Samples Used: <span id="samples-used">0</span></p>
-    <p>Samples Free: <span id="samples-free">40</span></p>
+    <div class="storage-section">
+        <h4>Storage</h4>
+        <div class="info-row">
+            <span class="info-label">Total Used:</span>
+            <span class="info-value" id="storage-percent">0%</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Used:</span>
+            <span class="info-value" id="storage-used">0 KB</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Free:</span>
+            <span class="info-value" id="storage-free">0 KB</span>
+        </div>
+    </div>
+
+    <div class="storage-section">
+        <h4>Samples</h4>
+        <div class="info-row">
+            <span class="info-label">Total Used:</span>
+            <span class="info-value" id="samples-percent">0%</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Used:</span>
+            <span class="info-value" id="samples-used">0</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Free:</span>
+            <span class="info-value" id="samples-free">40</span>
+        </div>
+    </div>
 </div>
 
 <div id="file-list">
-    <h3>Kicks</h3>
-    <div class="samplepackbox" id="1-kick"></div>
-    <h3>Snares</h3>
-    <div class="samplepackbox" id="2-snare"></div>
-    <h3>Percussion</h3>
-    <div class="samplepackbox" id="3-perc"></div>
-    <h3>FX</h3>
-    <div class="samplepackbox" id="4-fx"></div>
-    <h3>Bass</h3>
-    <div class="samplepackbox" id="5-bass"></div>
-    <h3>Lead</h3>
-    <div class="samplepackbox" id="6-lead"></div>
-    <h3>Arpeggio</h3>
-    <div class="samplepackbox" id="7-arpeggio"></div>
-    <h3>Chords</h3>
-    <div class="samplepackbox" id="8-chord"></div>
+    <div class="sample-row">
+        <div class="sample-category">
+            <div class="samplepackbox" id="1-kick">
+                <h3>Kicks</h3>
+            </div>
+        </div>
+        <div class="sample-category">
+            <div class="samplepackbox" id="2-snare">
+                <h3>Snares</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="sample-row">
+        <div class="sample-category">
+            <div class="samplepackbox" id="3-perc">
+                <h3>Percussion</h3>
+            </div>
+        </div>
+        <div class="sample-category">
+            <div class="samplepackbox" id="4-fx">
+                <h3>FX</h3>
+            </div>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="sample-row">
+        <div class="sample-category">
+            <div class="samplepackbox" id="5-bass">
+                <h3>Bass</h3>
+            </div>
+        </div>
+        <div class="sample-category">
+            <div class="samplepackbox" id="6-lead">
+                <h3>Lead</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="sample-row">
+        <div class="sample-category">
+            <div class="samplepackbox" id="7-arpeggio">
+                <h3>Arpeggio</h3>
+            </div>
+        </div>
+        <div class="sample-category">
+            <div class="samplepackbox" id="8-chord">
+                <h3>Chords</h3>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="/static/js/samplemanager.js"></script>

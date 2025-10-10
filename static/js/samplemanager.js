@@ -44,7 +44,13 @@ async function fetchOpzSamples() {
         // Clear existing slots
         data.categories.forEach((category, catIndex) => {
             const container = document.getElementById(category);
+
+            // Preserve the heading if it exists
+            const heading = container.querySelector("h3");
             container.innerHTML = ""; // clear previous content
+            if (heading) {
+                container.appendChild(heading);
+            }
 
             data.sampleData[catIndex].forEach((slot, slotIndex) => {
                 const slotDiv = document.createElement("div");
