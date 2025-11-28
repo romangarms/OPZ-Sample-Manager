@@ -858,7 +858,7 @@ def create_op1_subdirectory():
 
     try:
         os.makedirs(safe_target_path)
-        return {"status": "created", "path": safe_target_path}, 200
+        return {"status": "created", "path": html.escape(safe_target_path)}, 200
     except Exception as e:
         current_app.logger.error(f"Error creating OP-1 subdirectory: {e}")
         return {"error": "Failed to create folder"}, 500
