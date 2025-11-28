@@ -68,6 +68,31 @@ def get_device_config(device=None):
     return get_config_setting("OPZ_MOUNT_PATH"), "OP-Z"
 
 
+def validate_path_within_allowed_dir(path, allowed_base):
+    """
+    Validate that a path is strictly within an allowed base directory.
+    Prevents path traversal attacks via ../ sequences.
+
+    Args:
+        path: The path to validate (will be normalized)
+        allowed_base: The allowed base directory
+
+    Returns:
+        tuple: (is_valid: bool, normalized_path: str or None, error: str or None)
+    """
+    # Normalize both paths to resolve any ../ or symlinks
+    normalized_path = os.path.normpath(os.path.abspath(path))
+    normalized_base = os.path.normpath(os.path.abspath(allowed_base))
+
+    # Check if path starts with base (with trailing sep to prevent prefix attacks)
+    # e.g., /foo/bar shouldn't match /foo/barbaz
+    if not (normalized_path == normalized_base or
+            normalized_path.startswith(normalized_base + os.sep)):
+        return False, None, "Path is outside allowed directory"
+
+    return True, normalized_path, None
+
+
 def get_device_storage_info(device, mount_path):
     """
     Calculate storage usage for the specified device.
@@ -235,6 +260,7 @@ def upload_sample():
             return {"error": f"Synth sample limit reached ({OP1_SYNTH_SAMPLE_LIMIT})"}, 400
 
         target_dir = os.path.join(mount_path, parent_folder, subdir)
+        allowed_base = mount_path
         sample_type = "drum" if parent_folder == "drum" else "synth"
         file_extension = ".aif"
         overwrite_existing = False
@@ -247,11 +273,17 @@ def upload_sample():
             return {"error": "Missing category or slot"}, 400
 
         target_dir = os.path.join(mount_path, "samplepacks", category, f"{int(slot)+1:02d}")
+        allowed_base = os.path.join(mount_path, "samplepacks")
         sample_type = get_sample_type_from_category(category)
         file_extension = ".aiff"
         overwrite_existing = True
 
-    os.makedirs(target_dir, exist_ok=True)
+    # Validate target directory is within allowed base (prevents path traversal)
+    is_valid, safe_target_dir, _ = validate_path_within_allowed_dir(target_dir, allowed_base)
+    if not is_valid:
+        return {"error": "Invalid target path"}, 403
+
+    os.makedirs(safe_target_dir, exist_ok=True)
 
     # Clean the filename and determine if conversion is needed
     original_filename = werkzeug.utils.secure_filename(file.filename)
@@ -261,14 +293,14 @@ def upload_sample():
     # Final filename
     base_name = os.path.splitext(original_filename)[0]
     final_filename = base_name + file_extension
-    final_path = os.path.join(target_dir, final_filename)
+    final_path = os.path.join(safe_target_dir, final_filename)
 
     # OP-1: Avoid overwriting by adding counter
     if not overwrite_existing:
         counter = 1
         while os.path.exists(final_path):
             final_filename = f"{base_name}_{counter}{file_extension}"
-            final_path = os.path.join(target_dir, final_filename)
+            final_path = os.path.join(safe_target_dir, final_filename)
             counter += 1
 
     temp_path = None
@@ -276,8 +308,8 @@ def upload_sample():
     try:
         # OP-Z: Delete existing files in slot before uploading
         if overwrite_existing:
-            for existing_file in os.listdir(target_dir):
-                existing_path = os.path.join(target_dir, existing_file)
+            for existing_file in os.listdir(safe_target_dir):
+                existing_path = os.path.join(safe_target_dir, existing_file)
                 if os.path.isfile(existing_path):
                     os.remove(existing_path)
 
@@ -312,28 +344,34 @@ def delete_sample():
     sample_path = data.get("path")
     device = data.get("device", get_config_setting("SELECTED_DEVICE"))
 
-    if not sample_path or not os.path.isfile(sample_path):
+    if not sample_path:
         return {"error": "Invalid path"}, 400
 
     mount_path, device_name = get_device_config(device)
 
+    # Determine allowed base directory
     if device == "op1":
-        # OP-1: Validate path is within mount directory
-        if not sample_path.startswith(mount_path):
-            return {"error": "Unauthorized path"}, 403
+        allowed_base = mount_path
+    else:
+        allowed_base = os.path.join(mount_path, "samplepacks")
 
-        # Check if in "user" directory (read-only)
-        rel_path = os.path.relpath(sample_path, mount_path)
+    # Validate path is within allowed directory (prevents path traversal)
+    is_valid, safe_path, error = validate_path_within_allowed_dir(sample_path, allowed_base)
+    if not is_valid:
+        return {"error": "Unauthorized path"}, 403
+
+    if not os.path.isfile(safe_path):
+        return {"error": "Invalid path"}, 400
+
+    # OP-1: Check if in "user" directory (read-only)
+    if device == "op1":
+        rel_path = os.path.relpath(safe_path, mount_path)
         parts = rel_path.split(os.sep)
         if len(parts) >= 2 and parts[1] == "user":
             return {"error": "Cannot delete from 'user' directory"}, 403
-    else:
-        # OP-Z: Validate path is within samplepacks directory
-        if not sample_path.startswith(os.path.join(mount_path, "samplepacks")):
-            return {"error": "Unauthorized path"}, 403
 
     try:
-        os.remove(sample_path)
+        os.remove(safe_path)
         return {"status": "deleted"}, 200
     except Exception as e:
         current_app.logger.error(f"Error deleting {device_name} file: {e}")
@@ -348,32 +386,44 @@ def move_sample():
     if not source_path or not target_category or target_slot is None:
         return {"error": "Missing required fields"}, 400
 
-    if not os.path.isfile(source_path):
+    OPZ_MOUNT_PATH = get_config_setting("OPZ_MOUNT_PATH")
+    allowed_base = os.path.join(OPZ_MOUNT_PATH, "samplepacks")
+
+    # Validate source path is within samplepacks (prevents path traversal)
+    is_valid, safe_source_path, _ = validate_path_within_allowed_dir(source_path, allowed_base)
+    if not is_valid:
+        return {"error": "Invalid source path"}, 403
+
+    if not os.path.isfile(safe_source_path):
         return {"error": "Source file doesn't exist"}, 404
 
-    # Resolve destination path
-    OPZ_MOUNT_PATH = get_config_setting("OPZ_MOUNT_PATH")
-    filename = os.path.basename(source_path)
+    # Resolve and validate destination path
+    filename = os.path.basename(safe_source_path)
     target_dir = os.path.join(OPZ_MOUNT_PATH, "samplepacks", target_category, f"{int(target_slot)+1:02d}")
-    os.makedirs(target_dir, exist_ok=True)
-    target_path = os.path.join(target_dir, filename)
+
+    is_valid, safe_target_dir, _ = validate_path_within_allowed_dir(target_dir, allowed_base)
+    if not is_valid:
+        return {"error": "Invalid target path"}, 403
+
+    os.makedirs(safe_target_dir, exist_ok=True)
+    target_path = os.path.join(safe_target_dir, filename)
 
     try:
         # Check if there's an existing file in the target slot
-        existing_files = [f for f in os.listdir(target_dir) if os.path.isfile(os.path.join(target_dir, f))]
+        existing_files = [f for f in os.listdir(safe_target_dir) if os.path.isfile(os.path.join(safe_target_dir, f))]
         if existing_files:
             # Assume one sample per folder — just grab the first one
-            existing_target = os.path.join(target_dir, existing_files[0])
+            existing_target = os.path.join(safe_target_dir, existing_files[0])
 
             # Swap paths if moving between different slots
-            if os.path.abspath(source_path) != os.path.abspath(existing_target):
+            if os.path.abspath(safe_source_path) != os.path.abspath(existing_target):
                 # Move target sample to source's original folder
-                source_dir = os.path.dirname(source_path)
+                source_dir = os.path.dirname(safe_source_path)
                 swapped_target = os.path.join(source_dir, os.path.basename(existing_target))
                 os.rename(existing_target, swapped_target)
 
         # Move new file into target slot (overwriting any remaining copy of itself)
-        os.rename(source_path, target_path)
+        os.rename(safe_source_path, target_path)
 
         return {"status": "moved", "path": html.escape(target_path)}, 200
 
@@ -647,7 +697,13 @@ def upload_op1_folder():
 
     # Create the subdirectory
     target_dir = os.path.join(OP1_MOUNT_PATH, parent_folder, folder_name)
-    os.makedirs(target_dir, exist_ok=True)
+
+    # Validate target directory is within OP-1 mount (prevents path traversal)
+    is_valid, safe_target_dir, _ = validate_path_within_allowed_dir(target_dir, OP1_MOUNT_PATH)
+    if not is_valid:
+        return {"error": "Invalid folder path"}, 403
+
+    os.makedirs(safe_target_dir, exist_ok=True)
 
     uploaded = []
     errors = []
@@ -662,13 +718,13 @@ def upload_op1_folder():
 
         base_name = os.path.splitext(original_filename)[0]
         final_filename = base_name + ".aif"
-        final_path = os.path.join(target_dir, final_filename)
+        final_path = os.path.join(safe_target_dir, final_filename)
 
         # Avoid overwriting
         counter = 1
         while os.path.exists(final_path):
             final_filename = f"{base_name}_{counter}.aif"
-            final_path = os.path.join(target_dir, final_filename)
+            final_path = os.path.join(safe_target_dir, final_filename)
             counter += 1
 
         temp_path = None
@@ -724,12 +780,17 @@ def create_op1_subdirectory():
 
     target_path = os.path.join(OP1_MOUNT_PATH, parent, name)
 
-    if os.path.exists(target_path):
+    # Validate target path is within OP-1 mount (prevents path traversal)
+    is_valid, safe_target_path, _ = validate_path_within_allowed_dir(target_path, OP1_MOUNT_PATH)
+    if not is_valid:
+        return {"error": "Invalid folder path"}, 403
+
+    if os.path.exists(safe_target_path):
         return {"error": "Folder already exists"}, 400
 
     try:
-        os.makedirs(target_path)
-        return {"status": "created", "path": target_path}, 200
+        os.makedirs(safe_target_path)
+        return {"status": "created", "path": safe_target_path}, 200
     except Exception as e:
         current_app.logger.error(f"Error creating OP-1 subdirectory: {e}")
         return {"error": "Failed to create folder"}, 500
@@ -765,14 +826,23 @@ def rename_op1_subdirectory():
     old_full_path = os.path.join(OP1_MOUNT_PATH, parent, old_name)
     new_full_path = os.path.join(OP1_MOUNT_PATH, parent, new_name)
 
-    if not os.path.exists(old_full_path):
+    # Validate both paths are within OP-1 mount (prevents path traversal)
+    is_valid, safe_old_path, _ = validate_path_within_allowed_dir(old_full_path, OP1_MOUNT_PATH)
+    if not is_valid:
+        return {"error": "Invalid source path"}, 403
+
+    is_valid, safe_new_path, _ = validate_path_within_allowed_dir(new_full_path, OP1_MOUNT_PATH)
+    if not is_valid:
+        return {"error": "Invalid target path"}, 403
+
+    if not os.path.exists(safe_old_path):
         return {"error": "Folder does not exist"}, 404
 
-    if os.path.exists(new_full_path):
+    if os.path.exists(safe_new_path):
         return {"error": "A folder with that name already exists"}, 400
 
     try:
-        os.rename(old_full_path, new_full_path)
+        os.rename(safe_old_path, safe_new_path)
         return {"status": "renamed", "new_path": f"{parent}/{new_name}"}, 200
     except Exception as e:
         current_app.logger.error(f"Error renaming OP-1 subdirectory: {e}")
@@ -801,12 +871,17 @@ def delete_op1_subdirectory():
     OP1_MOUNT_PATH = get_config_setting("OP1_MOUNT_PATH")
     full_path = os.path.join(OP1_MOUNT_PATH, parent, name)
 
-    if not os.path.exists(full_path):
+    # Validate path is within OP-1 mount (prevents path traversal)
+    is_valid, safe_path, _ = validate_path_within_allowed_dir(full_path, OP1_MOUNT_PATH)
+    if not is_valid:
+        return {"error": "Invalid path"}, 403
+
+    if not os.path.exists(safe_path):
         return {"error": "Folder does not exist"}, 404
 
     try:
         import shutil
-        shutil.rmtree(full_path)
+        shutil.rmtree(safe_path)
         return {"status": "deleted"}, 200
     except Exception as e:
         current_app.logger.error(f"Error deleting OP-1 subdirectory: {e}")
