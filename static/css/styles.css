@@ -56,9 +56,61 @@ body {
     border-radius: 10px;
 }
 
-/* Backwards compatibility */
+.info-container {
+    background-color: transparent;
+    padding: 15px 20px;
+    margin: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--neutral-gray);
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--neutral-gray);
+}
+
+.info-container .info-icon {
+    color: var(--third-color);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.info-container .info-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.info-container p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-container .info-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background-color: transparent;
+    color: var(--neutral-gray);
+    border: 1px solid var(--neutral-gray);
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+}
+
+.info-container .info-link:hover {
+    background-color: var(--neutral-gray);
+    color: white;
+}
+
+/* Default styling for mount-path-container (overridden by .info-container or .error-container) */
 #mount-path-container {
-    background-color: var(--fourth-color);
     padding: 20px;
     margin: auto;
     margin-top: 20px;

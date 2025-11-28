@@ -12,28 +12,41 @@
 <h1>Teenage Engineering Sample Utility</h1>
 
 <script>
-    // make a request to "/get-config-setting?config_option=OPZ_MOUNT_PATH" to check if a mount path is set
-    function checkMountPath() {
-        fetch('/get-config-setting?config_option=OPZ_MOUNT_PATH')
-            .then(response => response.json())
-            .then(data => {
-                if (data.config_value && data.config_value !== '') {
-                    document.getElementById('mount-path-container').hidden = true;
-                } else {
-                    document.getElementById('mount-path').innerHTML = 'OP-Z mount path not set. Please select your OP-Z mount directory in <a href="/utilitysettings" class="btn btn-danger">Utility Settings</a>';
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching mount path:', error);
-                document.getElementById('mount-path').innerText = 'Error fetching mount path.';
-            });
+    // Check if any devices (OP-Z or OP-1) are configured
+    async function checkDevicePaths() {
+        try {
+            const [opzRes, op1Res] = await Promise.all([
+                fetch('/get-config-setting?config_option=OPZ_MOUNT_PATH').then(r => r.json()),
+                fetch('/get-config-setting?config_option=OP1_MOUNT_PATH').then(r => r.json())
+            ]);
+
+            const opzSet = opzRes.config_value && opzRes.config_value !== '';
+            const op1Set = op1Res.config_value && op1Res.config_value !== '';
+
+            if (opzSet || op1Set) {
+                document.getElementById('mount-path-container').hidden = true;
+            } else {
+                // Show info container with neutral styling and yellow icon
+                const container = document.getElementById('mount-path-container');
+                container.hidden = false;
+                container.classList.remove('error-container');
+                container.classList.add('info-container');
+                document.getElementById('mount-path').innerHTML =
+                    'No devices configured. <a href="/utilitysettings" class="info-link">Configure in Utility Settings</a>';
+                // Re-render Lucide icons for the newly visible container
+                lucide.createIcons();
+            }
+        } catch (error) {
+            console.error('Error checking device paths:', error);
+            document.getElementById('mount-path').innerText = 'Error checking device configuration.';
+        }
     }
 
     // Run on page load
-    checkMountPath();
+    checkDevicePaths();
 
     // Run when window regains focus
-    window.addEventListener('focus', checkMountPath);
+    window.addEventListener('focus', checkDevicePaths);
 
     // Initialize Lucide icons
     document.addEventListener('DOMContentLoaded', () => {
@@ -48,8 +61,9 @@
     }
 </script>
 
-<div id="mount-path-container" class="error-container container">
-    <p id="mount-path">Checking OP-Z mount path...</p>
+<div id="mount-path-container" class="error-container container" hidden>
+    <span id="mount-path-icon" class="info-icon"><i data-lucide="alert-circle"></i></span>
+    <p id="mount-path"></p>
 </div>
 
 <div class="tile-grid">
