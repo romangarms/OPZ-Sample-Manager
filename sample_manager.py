@@ -68,24 +68,72 @@ def get_device_config(device=None):
     return get_config_setting("OPZ_MOUNT_PATH"), "OP-Z"
 
 
-def validate_path_within_allowed_dir(path, allowed_base):
+def sanitize_and_validate_path(allowed_base, *path_components):
     """
-    Validate that a path is strictly within an allowed base directory.
-    Prevents path traversal attacks via ../ sequences.
+    Sanitize path components and validate the resulting path is within an allowed directory.
+    Prevents path traversal attacks and dangerous characters.
 
     Args:
-        path: The path to validate (will be normalized)
+        allowed_base: The allowed base directory
+        *path_components: Path components to sanitize and join.
+                          Each component is sanitized with secure_filename.
+
+    Returns:
+        tuple: (is_valid: bool, safe_path: str or None, error: str or None)
+    """
+    # Sanitize each path component
+    sanitized_components = []
+    for component in path_components:
+        if not component:
+            return False, None, "Path component cannot be empty"
+
+        # Use werkzeug's secure_filename to strip dangerous characters
+        sanitized = werkzeug.utils.secure_filename(str(component))
+
+        if not sanitized:
+            return False, None, f"Invalid path component: '{component}'"
+
+        # Ensure no path separators remain (defense in depth)
+        if os.sep in sanitized or '/' in sanitized or '\\' in sanitized:
+            return False, None, "Path component cannot contain separators"
+
+        sanitized_components.append(sanitized)
+
+    # Build the full path
+    full_path = os.path.join(allowed_base, *sanitized_components)
+
+    # Normalize to resolve any remaining ../ sequences
+    normalized_path = os.path.normpath(os.path.abspath(full_path))
+    normalized_base = os.path.normpath(os.path.abspath(allowed_base))
+
+    # Validate path is within allowed base
+    if not (normalized_path == normalized_base or
+            normalized_path.startswith(normalized_base + os.sep)):
+        return False, None, "Path is outside allowed directory"
+
+    return True, normalized_path, None
+
+
+def validate_full_path(full_path, allowed_base):
+    """
+    Validate that a full path is within an allowed directory.
+    Use this for paths received from the frontend (not constructed from components).
+
+    Args:
+        full_path: The complete path to validate
         allowed_base: The allowed base directory
 
     Returns:
         tuple: (is_valid: bool, normalized_path: str or None, error: str or None)
     """
-    # Normalize both paths to resolve any ../ or symlinks
-    normalized_path = os.path.normpath(os.path.abspath(path))
+    if not full_path:
+        return False, None, "Path cannot be empty"
+
+    # Normalize to resolve any ../ sequences
+    normalized_path = os.path.normpath(os.path.abspath(full_path))
     normalized_base = os.path.normpath(os.path.abspath(allowed_base))
 
-    # Check if path starts with base (with trailing sep to prevent prefix attacks)
-    # e.g., /foo/bar shouldn't match /foo/barbaz
+    # Validate path is within allowed base
     if not (normalized_path == normalized_base or
             normalized_path.startswith(normalized_base + os.sep)):
         return False, None, "Path is outside allowed directory"
@@ -259,8 +307,11 @@ def upload_sample():
         elif parent_folder == "synth" and counts["synth_samples"] >= OP1_SYNTH_SAMPLE_LIMIT:
             return {"error": f"Synth sample limit reached ({OP1_SYNTH_SAMPLE_LIMIT})"}, 400
 
-        target_dir = os.path.join(mount_path, parent_folder, subdir)
-        allowed_base = mount_path
+        # Sanitize and validate path (prevents path traversal and dangerous characters)
+        is_valid, safe_target_dir, error = sanitize_and_validate_path(mount_path, parent_folder, subdir)
+        if not is_valid:
+            return {"error": error}, 403
+
         sample_type = "drum" if parent_folder == "drum" else "synth"
         file_extension = ".aif"
         overwrite_existing = False
@@ -272,16 +323,21 @@ def upload_sample():
         if not category or not slot:
             return {"error": "Missing category or slot"}, 400
 
-        target_dir = os.path.join(mount_path, "samplepacks", category, f"{int(slot)+1:02d}")
-        allowed_base = os.path.join(mount_path, "samplepacks")
+        # Validate category against allowed list
+        if category not in SAMPLE_CATEGORIES:
+            return {"error": "Invalid category"}, 400
+
+        # Sanitize and validate path (prevents path traversal and dangerous characters)
+        samplepacks_base = os.path.join(mount_path, "samplepacks")
+        is_valid, safe_target_dir, error = sanitize_and_validate_path(
+            samplepacks_base, category, f"{int(slot)+1:02d}"
+        )
+        if not is_valid:
+            return {"error": error}, 403
+
         sample_type = get_sample_type_from_category(category)
         file_extension = ".aiff"
         overwrite_existing = True
-
-    # Validate target directory is within allowed base (prevents path traversal)
-    is_valid, safe_target_dir, _ = validate_path_within_allowed_dir(target_dir, allowed_base)
-    if not is_valid:
-        return {"error": "Invalid target path"}, 403
 
     os.makedirs(safe_target_dir, exist_ok=True)
 
@@ -356,7 +412,7 @@ def delete_sample():
         allowed_base = os.path.join(mount_path, "samplepacks")
 
     # Validate path is within allowed directory (prevents path traversal)
-    is_valid, safe_path, error = validate_path_within_allowed_dir(sample_path, allowed_base)
+    is_valid, safe_path, error = validate_full_path(sample_path, allowed_base)
     if not is_valid:
         return {"error": "Unauthorized path"}, 403
 
@@ -387,23 +443,27 @@ def move_sample():
         return {"error": "Missing required fields"}, 400
 
     OPZ_MOUNT_PATH = get_config_setting("OPZ_MOUNT_PATH")
-    allowed_base = os.path.join(OPZ_MOUNT_PATH, "samplepacks")
+    samplepacks_base = os.path.join(OPZ_MOUNT_PATH, "samplepacks")
 
-    # Validate source path is within samplepacks (prevents path traversal)
-    is_valid, safe_source_path, _ = validate_path_within_allowed_dir(source_path, allowed_base)
+    # Validate source path is within samplepacks (full path from frontend)
+    is_valid, safe_source_path, error = validate_full_path(source_path, samplepacks_base)
     if not is_valid:
         return {"error": "Invalid source path"}, 403
 
     if not os.path.isfile(safe_source_path):
         return {"error": "Source file doesn't exist"}, 404
 
-    # Resolve and validate destination path
-    filename = os.path.basename(safe_source_path)
-    target_dir = os.path.join(OPZ_MOUNT_PATH, "samplepacks", target_category, f"{int(target_slot)+1:02d}")
+    # Validate target_category against allowed list
+    if target_category not in SAMPLE_CATEGORIES:
+        return {"error": "Invalid category"}, 400
 
-    is_valid, safe_target_dir, _ = validate_path_within_allowed_dir(target_dir, allowed_base)
+    # Sanitize and validate destination path
+    filename = os.path.basename(safe_source_path)
+    is_valid, safe_target_dir, error = sanitize_and_validate_path(
+        samplepacks_base, target_category, f"{int(target_slot)+1:02d}"
+    )
     if not is_valid:
-        return {"error": "Invalid target path"}, 403
+        return {"error": error}, 403
 
     os.makedirs(safe_target_dir, exist_ok=True)
     target_path = os.path.join(safe_target_dir, filename)
@@ -673,16 +733,20 @@ def upload_op1_folder():
     if parent_folder not in ["drum", "synth"]:
         return {"error": "Invalid parent folder"}, 400
 
-    # Sanitize folder name
-    folder_name = werkzeug.utils.secure_filename(folder_name)
-    if not folder_name or folder_name == "user":
-        return {"error": "Invalid folder name"}, 400
+    # Check for reserved folder name
+    if folder_name == "user":
+        return {"error": "Cannot use 'user' as folder name"}, 400
 
     OP1_MOUNT_PATH = get_config_setting("OP1_MOUNT_PATH")
 
     is_valid, error_message = validate_device_folder_structure("op1", OP1_MOUNT_PATH)
     if not is_valid:
         return {"error": error_message}, 400
+
+    # Sanitize and validate path (prevents path traversal and dangerous characters)
+    is_valid, safe_target_dir, error = sanitize_and_validate_path(OP1_MOUNT_PATH, parent_folder, folder_name)
+    if not is_valid:
+        return {"error": error}, 403
 
     # Check limits
     counts = get_op1_counts(OP1_MOUNT_PATH)
@@ -694,14 +758,6 @@ def upload_op1_folder():
     else:
         if counts["synth_samples"] + num_files > OP1_SYNTH_SAMPLE_LIMIT:
             return {"error": f"Would exceed synth sample limit ({OP1_SYNTH_SAMPLE_LIMIT})"}, 400
-
-    # Create the subdirectory
-    target_dir = os.path.join(OP1_MOUNT_PATH, parent_folder, folder_name)
-
-    # Validate target directory is within OP-1 mount (prevents path traversal)
-    is_valid, safe_target_dir, _ = validate_path_within_allowed_dir(target_dir, OP1_MOUNT_PATH)
-    if not is_valid:
-        return {"error": "Invalid folder path"}, 403
 
     os.makedirs(safe_target_dir, exist_ok=True)
 
@@ -767,10 +823,9 @@ def create_op1_subdirectory():
     if parent not in ["drum", "synth"]:
         return {"error": "Invalid parent folder"}, 400
 
-    # Sanitize name
-    name = werkzeug.utils.secure_filename(name)
-    if not name or name == "user":
-        return {"error": "Invalid folder name"}, 400
+    # Check for reserved folder name
+    if name == "user":
+        return {"error": "Cannot use 'user' as folder name"}, 400
 
     OP1_MOUNT_PATH = get_config_setting("OP1_MOUNT_PATH")
 
@@ -778,12 +833,10 @@ def create_op1_subdirectory():
     if not is_valid:
         return {"error": error_message}, 400
 
-    target_path = os.path.join(OP1_MOUNT_PATH, parent, name)
-
-    # Validate target path is within OP-1 mount (prevents path traversal)
-    is_valid, safe_target_path, _ = validate_path_within_allowed_dir(target_path, OP1_MOUNT_PATH)
+    # Sanitize and validate path (prevents path traversal and dangerous characters)
+    is_valid, safe_target_path, error = sanitize_and_validate_path(OP1_MOUNT_PATH, parent, name)
     if not is_valid:
-        return {"error": "Invalid folder path"}, 403
+        return {"error": error}, 403
 
     if os.path.exists(safe_target_path):
         return {"error": "Folder already exists"}, 400
@@ -816,24 +869,20 @@ def rename_op1_subdirectory():
     if old_name == "user":
         return {"error": "Cannot rename 'user' directory"}, 403
 
-    # Sanitize new name
-    new_name = werkzeug.utils.secure_filename(new_name)
-    if not new_name or new_name == "user":
-        return {"error": "Invalid new name"}, 400
+    # Can't rename to "user"
+    if new_name == "user":
+        return {"error": "Cannot use 'user' as folder name"}, 400
 
     OP1_MOUNT_PATH = get_config_setting("OP1_MOUNT_PATH")
 
-    old_full_path = os.path.join(OP1_MOUNT_PATH, parent, old_name)
-    new_full_path = os.path.join(OP1_MOUNT_PATH, parent, new_name)
-
-    # Validate both paths are within OP-1 mount (prevents path traversal)
-    is_valid, safe_old_path, _ = validate_path_within_allowed_dir(old_full_path, OP1_MOUNT_PATH)
+    # Sanitize and validate both paths (prevents path traversal and dangerous characters)
+    is_valid, safe_old_path, error = sanitize_and_validate_path(OP1_MOUNT_PATH, parent, old_name)
     if not is_valid:
-        return {"error": "Invalid source path"}, 403
+        return {"error": error}, 403
 
-    is_valid, safe_new_path, _ = validate_path_within_allowed_dir(new_full_path, OP1_MOUNT_PATH)
+    is_valid, safe_new_path, error = sanitize_and_validate_path(OP1_MOUNT_PATH, parent, new_name)
     if not is_valid:
-        return {"error": "Invalid target path"}, 403
+        return {"error": error}, 403
 
     if not os.path.exists(safe_old_path):
         return {"error": "Folder does not exist"}, 404
@@ -869,12 +918,11 @@ def delete_op1_subdirectory():
         return {"error": "Cannot delete 'user' directory"}, 403
 
     OP1_MOUNT_PATH = get_config_setting("OP1_MOUNT_PATH")
-    full_path = os.path.join(OP1_MOUNT_PATH, parent, name)
 
-    # Validate path is within OP-1 mount (prevents path traversal)
-    is_valid, safe_path, _ = validate_path_within_allowed_dir(full_path, OP1_MOUNT_PATH)
+    # Sanitize and validate path (prevents path traversal and dangerous characters)
+    is_valid, safe_path, error = sanitize_and_validate_path(OP1_MOUNT_PATH, parent, name)
     if not is_valid:
-        return {"error": "Invalid path"}, 403
+        return {"error": error}, 403
 
     if not os.path.exists(safe_path):
         return {"error": "Folder does not exist"}, 404
