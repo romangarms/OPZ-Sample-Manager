@@ -1,0 +1,285 @@
+  importing bass2.aif...invalid synth sample
+  importing bass3.aif...invalid synth sample
+  importing bass4_saw.aif...invalid synth sample
+  importing bass5_guitar.aif...invalid synth sample
+  importing b_808.aif...invalid synth sample
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...12.1/24.0 MB
+  importing s_bell.aif...invalid synth sample
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...12.1/24.0 MB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...12.1/24.0 MB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...12.1/24.0 MB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...12.1/24.0 MB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...12.1/24.0 MB
+  importing b_808.aif...invalid synth sample
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...12.1/24.0 MB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...12.1/24.0 MB
+  importing bass1.aif...SUCCESS. New used space 12533 kB
+  importing bass2.aif...SUCCESS. New used space 12992 kB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...12.6/24.0 MB
+  importing bass3.aif...SUCCESS. New used space 13080 kB
+  importing bass4_saw.aif...SUCCESS. New used space 13346 kB
+  importing bass5_guitar.aif...SUCCESS. New used space 13676 kB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...13.3/24.0 MB
+  importing b_808.aif...SUCCESS. New used space 13955 kB
+  importing s_epiano.aif...SUCCESS. New used space 14264 kB
+  importing s_guitar.aif...SUCCESS. New used space 14658 kB
+  importing s_guitar2.aif...SUCCESS. New used space 15613 kB
+  importing s_dulcimer.aif...SUCCESS. New used space 16195 kB
+  importing s_beep.aif...SUCCESS. New used space 16211 kB
+  importing s_bell.aif...SUCCESS. New used space 16415 kB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...15.10/24.0 MB
+  importing s_lead1.aif...SUCCESS. New used space 16504 kB
+  importing s_lead2.aif...SUCCESS. New used space 16575 kB
+  importing s_chord1.aif...SUCCESS. New used space 16805 kB
+  importing s_chord2.aif...SUCCESS. New used space 17145 kB
+  importing s_chord3.aif...SUCCESS. New used space 17453 kB
+  importing s_chord4.aif...SUCCESS. New used space 17699 kB
+  importing s_chord5epiano.aif...SUCCESS. New used space 17971 kB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...17.5/24.0 MB
+  importing koenji.aif...SUCCESS. New used space 18459 kB
+  importing lofi piano.aif...SUCCESS. New used space 18982 kB
+  importing distant lights.aif...SUCCESS. New used space 19506 kB
+  importing dwarven fortress.aif...SUCCESS. New used space 20029 kB
+  importing electric piano.aif...SUCCESS. New used space 20552 kB
+  importing kitsune.aif...SUCCESS. New used space 21076 kB
+  importing lost tower.aif...SUCCESS. New used space 21599 kB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...21.0/24.0 MB
+  importing dk_electric.aiff.aif...SUCCESS. New used space 22607 kB
+  importing dk_electric_sd.aiff.aif...SUCCESS. New used space 23630 kB
+  importing dk_electric_hats.aiff.aif...SUCCESS. New used space 24165 kB
+  Can't import samplepacks/4-fx/08/dk_needledrop.aiff.aif, sample memory full
+  importing PLINK.aif...SUCCESS. New used space 24182 kB
+  importing s_glasstone.aif...SUCCESS. New used space 24230 kB
+  importing s_moog.aif...SUCCESS. New used space 24311 kB
+  importing s_pluck.aif...SUCCESS. New used space 24361 kB
+  importing s_wurli.aif...SUCCESS. New used space 24524 kB
+  Can't import samplepacks/7-arpeggio/08/s_guitar.aif, sample memory full
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...23.9/24.0 MB
+  Can't import samplepacks/3-perc/04/dk_fills.aiff.aif, sample memory full
+  Can't import samplepacks/3-perc/05/dk_deeptines.aiff.aif, sample memory full
+  Can't import samplepacks/4-fx/08/dk_paris.aiff.aif, sample memory full
+  Can't import samplepacks/4-fx/09/dk_gaze_synth.aiff.aif, sample memory full
+  Can't import samplepacks/4-fx/10/dk_syntharpchord.aiff.aif, sample memory full
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...23.9/24.0 MB
+  Can't import samplepacks/4-fx/08/dk_paris.aiff.aif, sample memory full
+  Can't import samplepacks/4-fx/09/dk_syntharpchord.aiff.aif, sample memory full
+  Can't import samplepacks/4-fx/10/dk_gaze_synth.aiff.aif, sample memory full
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...23.9/24.0 MB
+  Can't import samplepacks/4-fx/08/dk_deeptines.aif, sample memory full
+  Can't import samplepacks/4-fx/09/dk_gaze_synth.aif, sample memory full
+  Can't import samplepacks/4-fx/10/dk_paris.aif, sample memory full
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...23.9/24.0 MB
+  Can't import samplepacks/4-fx/08/f71000.aif, sample memory full
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+  clearing fx/07/
+Calculating used sample space...23.3/24.0 MB
+  Can't import samplepacks/4-fx/07/dk_deeptines.aif, sample memory full
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...23.3/24.0 MB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...23.3/24.0 MB
+Syncronizing rejected
+Syncronizing config
+  Ignoring file of wrong type: config/romantest.txt
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...23.3/24.0 MB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+
+[IMPORT STARTED]
+Reading content disk...SUCCESS
+Calculating used sample space...23.3/24.0 MB
+Syncronizing rejected
+Syncronizing config
+Syncronizing projects
+Syncronizing bounces
+Rebuilding plug definitions...SUCCESS
+[IMPORT COMPLETE]
+

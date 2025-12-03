@@ -13,3 +13,7 @@ __pycache__
 
 #LLM
 .claude/
+
+#personal backups
+backups/
+converted/

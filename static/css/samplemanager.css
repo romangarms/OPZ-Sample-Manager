@@ -160,14 +160,267 @@
 }
 
 /* Color coding for storage free value */
-#storage-free.storage-low {
+#storage-free.storage-low,
+#op1-storage-free.storage-low,
+#opz-storage-free.storage-low {
     color: var(--first-color) !important; /* Green */
 }
 
-#storage-free.storage-medium {
+#storage-free.storage-medium,
+#op1-storage-free.storage-medium,
+#opz-storage-free.storage-medium {
     color: var(--third-color) !important; /* Yellow */
 }
 
-#storage-free.storage-high {
+#storage-free.storage-high,
+#op1-storage-free.storage-high,
+#opz-storage-free.storage-high {
     color: var(--fourth-color) !important; /* Red */
+}
+
+/* ============================================
+   Device Tabs & OP-1 Support Styles
+   ============================================ */
+
+/* Header row with nav, tabs, and directory button */
+.header-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+/* Device tabs */
+.device-tabs {
+    display: flex;
+    gap: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.device-tab {
+    padding: 10px 24px;
+    border: none;
+    background-color: var(--offwhite);
+    color: var(--text-color);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.device-tab:hover {
+    background-color: var(--background-color);
+}
+
+.device-tab.active {
+    background-color: var(--second-color);
+    color: white;
+}
+
+/* Device containers */
+.device-container {
+    transition: opacity 0.2s ease;
+}
+
+.device-container[hidden] {
+    display: none;
+}
+
+/* Storage info - update for both devices */
+.storage-info {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.storage-section-wide {
+    flex: 2;
+    min-width: 300px;
+}
+
+/* OP-1 Section styling */
+.op1-section {
+    background-color: var(--background-color);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 0 10px 20px 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.op1-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--offwhite);
+}
+
+.op1-section-header h3 {
+    margin: 0;
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+/* OP-1 Subdirectory styling */
+.op1-subdirectory {
+    margin-bottom: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--offwhite);
+}
+
+.subdirectory-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    gap: 10px;
+}
+
+.subdirectory-header:hover {
+    background-color: #e8e8e8;
+}
+
+.expand-icon {
+    font-size: 12px;
+    transition: transform 0.2s ease;
+    width: 16px;
+    text-align: center;
+}
+
+.expand-icon.expanded {
+    transform: rotate(90deg);
+}
+
+.subdirectory-name {
+    font-weight: 600;
+    color: var(--text-color);
+    flex: 1;
+}
+
+.sample-count {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.subdirectory-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.subdirectory-actions button {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+}
+
+/* Read-only styling for "user" directory */
+.op1-subdirectory.read-only .subdirectory-header {
+    background-color: #f0f0f0;
+    cursor: default;
+}
+
+.op1-subdirectory.read-only .subdirectory-name {
+    color: #888;
+}
+
+.read-only-badge {
+    font-size: 0.75rem;
+    color: #888;
+    font-style: italic;
+}
+
+/* Subdirectory content (collapsible) */
+.subdirectory-content {
+    padding: 10px 15px 15px 15px;
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+}
+
+.subdirectory-content.collapsed {
+    display: none;
+}
+
+/* OP-1 Sample slot styling */
+.op1-sample {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: var(--offwhite);
+    border-radius: 5px;
+    margin-bottom: 6px;
+    gap: 10px;
+}
+
+.op1-sample:last-child {
+    margin-bottom: 0;
+}
+
+.op1-sample .sample-name {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.op1-sample .sample-size {
+    color: #666;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.op1-sample .sample-type-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.op1-sample .sample-type-badge.sample {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.op1-sample .sample-type-badge.patch {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+/* Empty subdirectory message */
+.empty-subdirectory {
+    color: #888;
+    font-style: italic;
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* Drag hover for OP-1 subdirectories */
+.op1-subdirectory.drag-hover {
+    background-color: #d0ebff;
+    border: 2px dashed #339af0;
+}
+
+.op1-section.drag-hover {
+    border: 2px dashed #339af0;
+}
+
+/* Small button variant */
+.btn-small {
+    padding: 6px 12px !important;
+    font-size: 0.85rem !important;
+}
+
+/* Drop zone styling for folder upload */
+.drop-zone-active {
+    border: 3px dashed var(--first-color) !important;
+    background-color: rgba(2, 115, 64, 0.05) !important;
 }

@@ -15,6 +15,13 @@
 {{ nav_button('/', 'Home Page') }}
 <button id="save-button" class="btn btn-secondary">Save Changes</button>
 
+<div id="device-error-container" class="error-container container" hidden>
+    <p id="device-error-message">OP-Z not configured. Please configure your OP-Z in <a href="/utilitysettings" class="btn btn-danger">Utility Settings</a></p>
+</div>
+
+<div id="main-content">
+
+
 <div id="config-container">
   <!-- First Row: General and MIDI side by side -->
   <div class="config-row">
@@ -45,6 +52,26 @@
     </div>
   </div>
 </div>
+</div>
+
+<script>
+// Check if OP-Z is configured before allowing access
+async function checkDeviceRequirement() {
+    try {
+        const res = await fetch('/get-config-setting?config_option=OPZ_MOUNT_PATH');
+        const data = await res.json();
+        const isSet = data.config_value && data.config_value !== '';
+
+        if (!isSet) {
+            document.getElementById('device-error-container').hidden = false;
+            document.getElementById('main-content').hidden = true;
+        }
+    } catch (error) {
+        console.error('Error checking device configuration:', error);
+    }
+}
+checkDeviceRequirement();
+</script>
 
 <script src="/static/js/configeditor.js"></script>
 

@@ -6,8 +6,17 @@ from flask import Blueprint, request, jsonify, current_app
 # Create Blueprint for config routes
 config_bp = Blueprint('config', __name__)
 
+# Project name constant - change this when renaming the project
+PROJECT_NAME = "OP1Z-Sample-Manager"
+
 CONFIG_PATH = "opz_sm_config.json"
 app_config = {}
+
+
+def get_default_working_directory():
+    """Return default working directory: ~/Documents/<PROJECT_NAME>/"""
+    documents = os.path.expanduser("~/Documents")
+    return os.path.join(documents, PROJECT_NAME)
 
 # Utility to read JSON from a file and return it as a Python object
 def read_json_from_path(path):
@@ -72,6 +81,20 @@ def reset_config():
 
 # Get a config setting with an optional default
 def get_config_setting(key, default=None):
+    # Special case: return default working directory if not set
+    if key == "WORKING_DIRECTORY":
+        value = app_config.get(key)
+        if not value:
+            return get_default_working_directory()
+        return value
+
+    # Special case: return default selected device if not set
+    if key == "SELECTED_DEVICE":
+        value = app_config.get(key)
+        if not value:
+            return "opz"  # Default to OP-Z
+        return value
+
     value = app_config.get(key, default)
     # If the value exists but is an empty string, use the default
     if value == "" and default is not None:

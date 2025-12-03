@@ -160,6 +160,8 @@ async function loadLoggerLevel() {
 window.onload = function () {
   loadConfigPath("FFMPEG_PATH", "ffmpeg-path-holder");
   loadConfigPath("OPZ_MOUNT_PATH", "opz-path-holder");
+  loadConfigPath("OP1_MOUNT_PATH", "op1-path-holder");
+  loadConfigPath("WORKING_DIRECTORY", "working-dir-holder");
   loadLoggerLevel();
 
   // only show ffmpeg settings if the OS is Windows
@@ -173,4 +175,6 @@ window.onload = function () {
 
   enableAutoResizeInput(document.getElementById("ffmpeg-path-holder"));
   enableAutoResizeInput(document.getElementById("opz-path-holder"));
+  enableAutoResizeInput(document.getElementById("op1-path-holder"));
+  enableAutoResizeInput(document.getElementById("working-dir-holder"));
 };

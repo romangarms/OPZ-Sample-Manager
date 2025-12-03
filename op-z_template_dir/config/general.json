@@ -1,0 +1,12 @@
+{
+    "backlit_keys": true,
+    "disable_headphone_db_reduction": true,
+    "disable_microphone_mode": false,
+    "disable_param_page_reset": false,
+    "disable_start_sound": false,
+    "disable_track_preview": true,
+    "generous_chords": true,
+    "latch_notes_with_shift": false,
+    "legacy_input_select": false,
+    "temp_param_add_fx_a": false
+}

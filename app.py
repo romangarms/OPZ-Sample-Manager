@@ -50,6 +50,10 @@ def sampleconverter():
 def samplemanager():
     return render_template("samplemanager.html")
 
+@app.route("/tapeexport")
+def tapeexport():
+    return render_template("tapeexport.html")
+
 @app.route("/configeditor")
 def configeditor():
     return render_template("configeditor.html")
@@ -57,6 +61,10 @@ def configeditor():
 @app.route("/utilitysettings")
 def utilitysettings():
     return render_template("utilitysettings.html")
+
+@app.route("/backup")
+def backup():
+    return render_template("backup.html")
 
 @app.route("/open-external-link")
 def open_external_link():

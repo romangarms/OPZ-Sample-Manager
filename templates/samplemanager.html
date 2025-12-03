@@ -6,65 +6,138 @@
 {%endblock%}
 
 {%block title %}
-<title>OP-Z Sample Manager</title>
+<title>Sample Manager</title>
 {%endblock%}
 
 {% block main %}
-<h1>OP-Z Sample Manager</h1>
+<h1>Sample Manager</h1>
 
-{{ nav_button('/', 'Home Page') }}
+<div class="header-row">
+    {{ nav_button('/', 'Home Page') }}
 
-<button onclick="fetchOpzSamples()" id="list-files" class="btn btn-secondary">List Files</button>
-<button onclick="openOpzDirectory()" class="btn btn-warning">Open OP-Z Directory</button>
+    <div class="device-tabs">
+        <button class="device-tab active" data-device="opz">OP-Z</button>
+        <button class="device-tab" data-device="op1">OP-1</button>
+    </div>
+
+    <button id="open-directory-btn" onclick="openDirectory()" class="btn btn-warning">Open Device Directory</button>
+</div>
+
 <div id="sample-output"></div>
 
 <div id="validation-error-container" class="error-container" hidden>
     <p id="validation-error-message"></p>
 </div>
 
-<div id="storage-info">
-    <div class="storage-section">
-        <h4>Storage</h4>
-        <div class="info-row">
-            <span class="info-label">Used:</span>
-            <span class="info-value" id="storage-used">0 KB</span>
+<!-- OP-Z Container -->
+<div id="opz-container" class="device-container">
+    <div id="opz-storage-info" class="storage-info">
+        <div class="storage-section">
+            <h4>Storage</h4>
+            <div class="info-row">
+                <span class="info-label">Used:</span>
+                <span class="info-value" id="opz-storage-used">0 KB</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Free:</span>
+                <span class="info-value" id="opz-storage-free">0 KB</span>
+            </div>
         </div>
-        <div class="info-row">
-            <span class="info-label">Free:</span>
-            <span class="info-value" id="storage-free">0 KB</span>
+
+        <div class="storage-section">
+            <h4>Usage</h4>
+            <div class="info-row">
+                <span class="info-label">Samples Used:</span>
+                <span class="info-value" id="opz-samples-used">0</span>
+            </div>
+            <div class="storage-bar-container">
+                <div class="storage-bar">
+                    <div class="storage-bar-fill" id="opz-storage-bar-fill"></div>
+                </div>
+                <span class="storage-bar-label" id="opz-storage-bar-label">Storage: 0%</span>
+            </div>
         </div>
     </div>
 
-    <div class="storage-section">
-        <h4>Usage</h4>
-        <div class="info-row">
-            <span class="info-label">Samples Used:</span>
-            <span class="info-value" id="samples-used">0</span>
-        </div>
-        <div class="storage-bar-container">
-            <div class="storage-bar">
-                <div class="storage-bar-fill" id="storage-bar-fill"></div>
-            </div>
-            <span class="storage-bar-label" id="storage-bar-label">Storage: 0%</span>
-        </div>
+    <div id="opz-file-list" class="file-list">
+        {{ sample_category_pair('1-kick', 'Kicks', '2-snare', 'Snares') }}
+        {{ sample_category_pair('3-perc', 'Percussion', '4-fx', 'FX') }}
+
+        <hr class="section-divider">
+
+        {{ sample_category_pair('5-bass', 'Bass', '6-lead', 'Lead') }}
+        {{ sample_category_pair('7-arpeggio', 'Arpeggio', '8-chord', 'Chords') }}
     </div>
 </div>
 
-<div id="file-list">
-    {{ sample_category_pair('1-kick', 'Kicks', '2-snare', 'Snares') }}
-    {{ sample_category_pair('3-perc', 'Percussion', '4-fx', 'FX') }}
+<!-- OP-1 Container -->
+<div id="op1-container" class="device-container" hidden>
+    <div id="op1-storage-info" class="storage-info">
+        <div class="storage-section">
+            <h4>Storage</h4>
+            <div class="info-row">
+                <span class="info-label">Used:</span>
+                <span class="info-value" id="op1-storage-used">0 MB</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Free:</span>
+                <span class="info-value" id="op1-storage-free">512 MB</span>
+            </div>
+        </div>
 
-    <hr class="section-divider">
+        <div class="storage-section">
+            <h4>Usage</h4>
+            <div class="info-row">
+                <span class="info-label">Drum Samples:</span>
+                <span class="info-value" id="op1-drum-samples">0 / 42</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Synth Samples:</span>
+                <span class="info-value" id="op1-synth-samples">0 / 42</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Patches:</span>
+                <span class="info-value" id="op1-patches">0 / 100</span>
+            </div>
+            <div class="storage-bar-container">
+                <div class="storage-bar">
+                    <div class="storage-bar-fill" id="op1-storage-bar-fill"></div>
+                </div>
+                <span class="storage-bar-label" id="op1-storage-bar-label">Storage: 0%</span>
+            </div>
+        </div>
+    </div>
 
-    {{ sample_category_pair('5-bass', 'Bass', '6-lead', 'Lead') }}
-    {{ sample_category_pair('7-arpeggio', 'Arpeggio', '8-chord', 'Chords') }}
+    <div id="op1-file-list" class="file-list">
+        <!-- Drum Section -->
+        <div class="op1-section" id="op1-drum-section">
+            <div class="op1-section-header">
+                <h3>Drum</h3>
+                <button class="btn btn-small btn-secondary" onclick="createOp1Subdirectory('drum')">+ Add Folder</button>
+            </div>
+            <div class="op1-subdirectories" id="op1-drum-subdirectories">
+                <!-- Subdirectories will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Synth Section -->
+        <div class="op1-section" id="op1-synth-section">
+            <div class="op1-section-header">
+                <h3>Synth</h3>
+                <button class="btn btn-small btn-secondary" onclick="createOp1Subdirectory('synth')">+ Add Folder</button>
+            </div>
+            <div class="op1-subdirectories" id="op1-synth-subdirectories">
+                <!-- Subdirectories will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="/static/js/samplemanager.js"></script>
 <script>
-    // on page load, list the samples
+    // on page load, initialize device tabs and load samples
     document.addEventListener("DOMContentLoaded", function() {
-        fetchOpzSamples();
+        initDeviceTabs();
     });
 </script>
 

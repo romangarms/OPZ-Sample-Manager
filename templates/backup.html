@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>Backup & Restore</title>
+{% endblock %}
+
+{% block main %}
+
+<h1>Backup & Restore</h1>
+
+<a href="/" class="btn btn-secondary">Home Page</a>
+
+<div id="device-error-container" class="error-container container" hidden>
+    <p id="device-error-message">No devices configured. Please configure your OP-Z or OP-1 in <a href="/utilitysettings" class="btn btn-danger">Utility Settings</a></p>
+</div>
+
+<div id="main-content">
+<div class="samplepackbox" style="text-align: center; margin-top: 30px;">
+    <i data-lucide="construction" style="width: 64px; height: 64px; margin-bottom: 20px;"></i>
+    <h3>Coming Soon</h3>
+    <p>Backup and restore functionality for samples and projects is under development.</p>
+</div>
+</div>
+
+<script>
+    // Check if OP-Z or OP-1 is configured before allowing access
+    async function checkDeviceRequirement() {
+        try {
+            const [opzRes, op1Res] = await Promise.all([
+                fetch('/get-config-setting?config_option=OPZ_MOUNT_PATH').then(r => r.json()),
+                fetch('/get-config-setting?config_option=OP1_MOUNT_PATH').then(r => r.json())
+            ]);
+
+            const opzSet = opzRes.config_value && opzRes.config_value !== '';
+            const op1Set = op1Res.config_value && op1Res.config_value !== '';
+
+            if (!opzSet && !op1Set) {
+                document.getElementById('device-error-container').hidden = false;
+                document.getElementById('main-content').hidden = true;
+            }
+        } catch (error) {
+            console.error('Error checking device configuration:', error);
+        }
+    }
+    checkDeviceRequirement();
+
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}

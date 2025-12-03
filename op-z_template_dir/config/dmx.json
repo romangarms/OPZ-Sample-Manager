@@ -1,0 +1,35 @@
+
+{
+	"profiles":
+	[
+		{
+			"name": "rgb", "channels": ["red", "green", "blue"]
+		},
+		{
+			"name": "dimmer", "channels": ["intensity"]
+		},
+		{
+			"name": "movinghead_example", "channels": ["knob5", "knob6", "knob7", "knob8", "red", "green", "blue", "white", "strobe"]
+		}
+	],
+
+	"config":
+	[
+		{ "fixture": 1, "profile": "rgb" },
+		{ "fixture": 2, "profile": "rgb" },
+		{ "fixture": 3, "profile": "rgb" },
+		{ "fixture": 4, "profile": "rgb" },
+		{ "fixture": 5, "profile": "rgb" },
+		{ "fixture": 6, "profile": "rgb" },
+		{ "fixture": 7, "profile": "rgb" },
+		{ "fixture": 8, "profile": "rgb" },
+		{ "fixture": 9, "profile": "rgb" },
+		{ "fixture": 10, "profile": "rgb" },
+		{ "fixture": 11, "profile": "rgb" },
+		{ "fixture": 12, "profile": "rgb" },
+		{ "fixture": 13, "profile": "rgb" },
+		{ "fixture": 14, "profile": "rgb" },
+		{ "fixture": 15, "profile": "rgb" },
+		{ "fixture": 16, "profile": "rgb" }
+	]
+}

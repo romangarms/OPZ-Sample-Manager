@@ -10,6 +10,13 @@ h1 {
     max-width: 800px;
 }
 
+/* Container for split tiles (two half-width tiles side by side) */
+.tile-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
 .nav-tile {
     background-color: var(--background-color);
     padding: 30px;
@@ -66,29 +73,95 @@ h1 {
     background-color: var(--fourth-color);
 }
 
-.github-link {
+/* Neutral gray tile for meta/settings */
+.tile-neutral {
+    background-color: var(--neutral-gray);
+}
+
+/* OP-1 white tile */
+.tile-white {
+    background-color: var(--op1-white);
+    color: var(--text-color);
+}
+
+.tile-white:hover {
+    color: var(--text-color);
+}
+
+/* Half-tile styling (smaller for split containers) */
+.tile-half {
+    padding: 20px;
+}
+
+.tile-half i {
+    width: 36px;
+    height: 36px;
+}
+
+.tile-half h3 {
+    font-size: 1.1rem;
+}
+
+.tile-half p {
+    font-size: 0.8rem;
+}
+
+/* Device badge */
+.device-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.tile-white .device-badge {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Footer links */
+.footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.footer-link {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 24px;
-    background-color: #24292e;
-    color: white;
-    border-radius: 10px;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: transparent;
+    color: var(--neutral-gray);
+    border: 1px solid var(--neutral-gray);
+    border-radius: 8px;
     text-decoration: none;
+    font-size: 0.9rem;
     font-weight: 500;
-    margin-top: 20px;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.github-link:hover {
-    background-color: #2f363d;
+.footer-link:hover {
+    background-color: var(--neutral-gray);
     color: white;
-    transform: translateY(-2px);
 }
 
-.github-link i {
-    width: 24px;
-    height: 24px;
+.footer-link i {
+    width: 18px;
+    height: 18px;
+}
+
+.footer-separator {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--neutral-gray);
 }
 
 @media (max-width: 768px) {
@@ -97,5 +170,9 @@ h1 {
         max-width: 400px;
         margin-left: auto;
         margin-right: auto;
+    }
+
+    .tile-split {
+        grid-template-columns: 1fr;
     }
 }

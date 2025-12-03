@@ -34,13 +34,34 @@
 
 <!-- OP-Z Path -->
 <div>Set the path to the mounted OP-Z</div>
+<input id="opz-path-holder" placeholder="OP-Z mount path goes here" style="min-width: 200px;"
+       onblur="setConfigPath('OPZ_MOUNT_PATH', 'opz-path-holder', 'opz-info')" />
 <button onclick="openPathPicker('/get-user-folder-path', 'opz-path-holder', 'opz-info', 'OPZ_MOUNT_PATH', true)" class="btn btn-warning">
   Open Folder Browser
 </button>
-<input id="opz-path-holder" placeholder="OP-Z mount path goes here" style="min-width: 200px;" />
-<button onclick="setConfigPath('OPZ_MOUNT_PATH', 'opz-path-holder', 'opz-info')" class="btn btn-primary">Set</button>
-<button onclick="removeConfigPath('OPZ_MOUNT_PATH', 'opz-path-holder', 'opz-info')" class="btn btn-danger">Clear</button>
 <p id="opz-info"></p>
+
+<hr>
+
+<!-- OP-1 Path -->
+<div>Set the path to the mounted OP-1</div>
+<input id="op1-path-holder" placeholder="OP-1 mount path goes here" style="min-width: 200px;"
+       onblur="setConfigPath('OP1_MOUNT_PATH', 'op1-path-holder', 'op1-info')" />
+<button onclick="openPathPicker('/get-user-folder-path', 'op1-path-holder', 'op1-info', 'OP1_MOUNT_PATH', true)" class="btn btn-warning">
+  Open Folder Browser
+</button>
+<p id="op1-info"></p>
+
+<hr>
+
+<!-- Working Directory -->
+<div>Set the working directory for exported samples and project backups</div>
+<input id="working-dir-holder" placeholder="Working directory goes here" style="min-width: 200px;"
+       onblur="setConfigPath('WORKING_DIRECTORY', 'working-dir-holder', 'working-dir-info')" />
+<button onclick="openPathPicker('/get-user-folder-path', 'working-dir-holder', 'working-dir-info', 'WORKING_DIRECTORY', true)" class="btn btn-warning">
+  Open Folder Browser
+</button>
+<p id="working-dir-info"></p>
 
 <hr>
 
